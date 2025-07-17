@@ -1,51 +1,30 @@
-// src/app/guards/role.guard.ts
-import { CanActivateFn, Router, UrlTree } from '@angular/router';
+// guards/role.guard.ts
+
 import { inject } from '@angular/core';
+import { CanActivateFn } from '@angular/router';
+import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
 
-/*
-  👉 LocalStorage se user read karenge (temporary session store).
-  👉 expectRole == jis route ko access kar rahe (admin / teacher / student)
-  👉 Agar match nahi -> user ko uske apne dashboard pe redirect.
+export const adminGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (auth.getUserRole() === 'admin') return true;
+  router.navigate(['/login']);
+  return false;
+};
 
-  Why return UrlTree? Angular me recommended hai redirect ke liye.
-*/
-function getStrictRoleGuard(expectRole: 'admin' | 'teacher' | 'student'): CanActivateFn {
-  return (): boolean | UrlTree => {
-    const router = inject(Router);
+export const teacherGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (auth.getUserRole() === 'teacher') return true;
+  router.navigate(['/login']);
+  return false;
+};
 
-    if (typeof window === 'undefined') return false;
-
-    const userStr = localStorage.getItem('user');
-    if (!userStr) {
-      // ⚠️ logged in hi nahi -> login bhejo
-      return router.parseUrl('/login');
-    }
-
-    let user: any;
-    try {
-      user = JSON.parse(userStr);
-    } catch {
-      // ⚠️ corrupt session -> logout + login bhejo
-      localStorage.removeItem('user');
-      return router.parseUrl('/login');
-    }
-
-    // 👉 user.role exactly same hona chahiye
-    if (user.role === expectRole) {
-      return true; // ✅ allow
-    }
-
-    // ⚠️ mismatch -> apne dashboard bhejo
-    switch (user.role) {
-      case 'admin':   return router.parseUrl('/admin');
-      case 'teacher': return router.parseUrl('/teacher');
-      case 'student': return router.parseUrl('/student');
-      default:        return router.parseUrl('/login');
-    }
-  };
-}
-
-/* 👉 Export ready guards */
-export const adminGuard:   CanActivateFn = getStrictRoleGuard('admin');
-export const teacherGuard: CanActivateFn = getStrictRoleGuard('teacher');
-export const studentGuard: CanActivateFn = getStrictRoleGuard('student');
+export const studentGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (auth.getUserRole() === 'student') return true;
+  router.navigate(['/login']);
+  return false;
+};

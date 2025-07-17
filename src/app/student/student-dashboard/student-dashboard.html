@@ -1,1 +1,47 @@
-<p>student-dashboard works!</p>
+<div class="dashboard-wrapper" [class.sidebar-open]="sidebarOpen">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <h3>Student Panel</h3>
+    <ul>
+      <li><a routerLink="/student/attendance">📅 Attendance</a></li>
+      <li><a routerLink="/student/marks">📊 Grades</a></li>
+      <li><a routerLink="/student/tests">📝 Tests</a></li>
+      <li><a routerLink="/student/profile">👤 Profile</a></li>
+      <li><a (click)="logout()">🚪 Logout</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Top Navbar with Toggle Button -->
+    <header class="topbar">
+      <button (click)="toggleSidebar()">☰</button>
+      <span>Welcome, {{ student?.name }}</span>
+    </header>
+
+    <!-- Dashboard Content -->
+    <section class="content">
+      <h2>Dashboard Overview</h2>
+
+      <div class="cards">
+        <div class="card">
+          <h4>Attendance</h4>
+          <p>{{ attendanceSummary }}</p>
+          <a routerLink="/student/attendance">View</a>
+        </div>
+
+        <div class="card">
+          <h4>Grades</h4>
+          <p>{{ gradeSummary }}</p>
+          <a routerLink="/student/marks">View</a>
+        </div>
+
+        <div class="card">
+          <h4>Tests</h4>
+          <p>{{ testSummary }}</p>
+          <a routerLink="/student/tests">View</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

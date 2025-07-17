@@ -1,22 +1,24 @@
+// auth/login/login.component.ts
+
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
-  standalone: true, // ✅ Angular 19 standalone component
-  imports: [CommonModule, FormsModule], // ✅ Forms ke liye zaroori
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
 export class Login {
-  // ✅ Bindings for form
   username: string = '';
   password: string = '';
   errorMsg: string = '';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private auth: AuthService) {}
 
   // ✅ Mock Users
   private admins = [
@@ -31,7 +33,6 @@ export class Login {
     { rollNo: 'SU002', password: '12345', role: 'student', name: 'Hina' }
   ];
 
-  // ✅ Login function
   onLogin() {
     this.errorMsg = '';
 
@@ -40,34 +41,31 @@ export class Login {
       return;
     }
 
-    // Check Admin
+    // ✅ Check Admin
     const admin = this.admins.find(a => a.email === this.username);
     if (admin && admin.password === this.password) {
-      this.saveSession(admin);
+      this.auth.login(admin);
       this.router.navigate(['/admin'], { replaceUrl: true });
       return;
     }
 
-    // Check Teacher
+    // ✅ Check Teacher
     const teacher = this.teachers.find(t => t.email === this.username);
     if (teacher && teacher.password === this.password) {
-      this.saveSession(teacher);
+      this.auth.login(teacher);
       this.router.navigate(['/teacher'], { replaceUrl: true });
       return;
     }
 
-    // Check Student (username as rollNo)
+    // ✅ Check Student (username = rollNo)
     const student = this.students.find(s => s.rollNo === this.username);
     if (student && student.password === this.password) {
-      this.saveSession(student);
-     this.router.navigate(['/student'], { replaceUrl: true });
+      this.auth.login(student);
+      this.router.navigate(['/student'], { replaceUrl: true });
       return;
     }
 
+    // ❌ If no match
     this.errorMsg = 'Invalid credentials!';
-  }
-
-  private saveSession(user: any) {
-    localStorage.setItem('user', JSON.stringify(user));
   }
 }

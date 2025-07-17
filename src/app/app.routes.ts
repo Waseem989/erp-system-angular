@@ -16,34 +16,51 @@ import { Marks } from './student/marks/marks';
 
 import { authGuard } from './guards/auth.guard';
 import { adminGuard, teacherGuard, studentGuard } from './guards/role.guard';
-import { Component } from '@angular/compiler';
-import path from 'path';
+
 import { NotFound } from './shared/not-found/not-found';
 
-
-
 export const routes: Routes = [
-{ path:'',redirectTo:'login', pathMatch:'full'},
-{path:'login', component: Login},
-//admin path and their subpages
-{path:'admin', canActivate: [authGuard, adminGuard], component:AdminDashboard},
-{path:'admin/attandance', canActivate: [authGuard, adminGuard], component:Attendance},
-{path:'admim/classes', canActivate: [authGuard, adminGuard], component:Classes},
-{path:'admin/notices', canActivate: [authGuard, adminGuard], component:Notices},
-{path:'admin/students', canActivate: [authGuard, adminGuard], component:Students},
-{path:'admin/teachers', canActivate: [authGuard, adminGuard],component:Teachers},
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: 'login', component: Login },
 
-//teacher path and their subpages
-{path:'teacher',canActivate: [authGuard, teacherGuard], component:TeacherDashboard},
-{path:'teacher/attendance',canActivate: [authGuard, teacherGuard],component:Attendance},
-{path:'teacher/my-classes',canActivate: [authGuard, teacherGuard],component:MyClasses},
-{path:'teacher/tests',canActivate: [authGuard, teacherGuard],component:Tests},
+  // ------------------ Admin Routes ------------------
+  {
+    path: 'admin',
+    canActivate: [authGuard, adminGuard],
+    children: [
+      { path: '', component: AdminDashboard },
+      { path: 'attendance', component: Attendance },
+      { path: 'classes', component: Classes },
+      { path: 'notices', component: Notices },
+      { path: 'students', component: Students },
+      { path: 'teachers', component: Teachers }
+    ]
+  },
 
-// student path and their subpages
-{path:'student',canActivate: [authGuard, studentGuard],component:StudentDashboard},
-{path:'student/attendance',canActivate: [authGuard, studentGuard],component:Attendance},
-{path:'student/marks',canActivate: [authGuard, studentGuard],component:Marks},
+  // ------------------ Teacher Routes ------------------
+  {
+    path: 'teacher',
+    canActivate: [authGuard, teacherGuard],
+    children: [
+      { path: '', component: TeacherDashboard },
+      { path: 'attendance', component: Attendance },
+      { path: 'my-classes', component: MyClasses },
+      { path: 'tests', component: Tests }
+    ]
+  },
 
-{path: '404', component:NotFound },
-{path: '**', redirectTo: '404' }
+  // ------------------ Student Routes ------------------
+  {
+    path: 'student',
+    canActivate: [authGuard, studentGuard],
+    children: [
+      { path: '', component: StudentDashboard },
+      { path: 'attendance', component: Attendance },
+      { path: 'marks', component: Marks }
+    ]
+  },
+
+  // ------------------ Not Found ------------------
+  { path: '404', component: NotFound },
+  { path: '**', redirectTo: '404' }
 ];
