@@ -10,15 +10,15 @@
   </header>
   <!-- Sidebar -->
   <aside class="sidebar">
-       <div class="profile">
+    <div class="profile">
       <img [src]="studentPic" alt="Teacher photo">
       <h4>{{ studentName }}</h4>
     </div>
     <ul>
-      <li><a routerLink="/student/attendance">📅 Attendance</a></li>
+      <li><a routerLink="/student/profile">👤 Profile</a></li>
+      <li><a routerLink="/student/attendances">📅 Attendance</a></li>
       <li><a routerLink="/student/marks">📊 Grades</a></li>
       <li><a routerLink="/student/tests">📝 Tests</a></li>
-      <li><a routerLink="/student/profile">👤 Profile</a></li>
       <li><a (click)="logout()">🚪 Logout</a></li>
     </ul>
   </aside>
@@ -28,21 +28,14 @@
   
   <!-- Main Content -->
   <main  >
-
-    <!-- Dashboard Content -->
-
-
-      <!-- Quick Access Cards -->
+     <!-- Quick Access Cards -->
     <section class="cards-container">
-      <div class="card" (click)="navigate('/student/attendance')">
+      <div class="card" (click)="navigate('attendance')">
          <h3>My Attendance</h3> 
       </div>
-      <div class="card" (click)="navigate('/student/marks')">
+      <div class="card" (click)="navigate('marks')">
         <h3> 📝 Grades</h3>
       </div>
-      <div class="card" (click)="navigate('/student/marks')">
-        <h3> 📊 Marks / Grades</h3>
-       </div>
 
     </section>
 

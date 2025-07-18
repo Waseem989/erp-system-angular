@@ -18,10 +18,12 @@
     
     <nav>
       <ul>
+        <li>👤 Profile</li>
         <li (click)="navigate('teacher-dashboard')"> Dashboard</li>
         <li (click)="navigate('attendance')"> Attendance</li>
-        <li (click)="navigate('marks')"> Marks / Grades</li>
-        <li (click)="navigate('notices')">📢 Notices</li>
+        <li (click)="navigate('tests')"> Marks / Grades</li>
+        <li (click)="navigate('my-classes')">My classes</li>
+        
         <li (click)="logout()"> Logout</li>
       </ul>
     </nav>
@@ -55,17 +57,15 @@
     <!-- Quick Access Cards -->
     <section class="cards-container">
       <div class="card" (click)="navigate('my-classes')">
-         <h3>My Classes</h3> 
+         <h3>My Classes And Grades</h3> 
       </div>
       <div class="card" (click)="navigate('attendance')">
         <h3> 📝 Attendance</h3>
       </div>
-      <div class="card" (click)="navigate('marks')">
-        <h3> 📊 Marks / Grades</h3>
+      <div class="card" (click)="navigate('tests')">
+        <h3> 📊 Test Marks </h3>
        </div>
-      <div class="card" (click)="navigate('notices')">
-      <h3> 📢 Notice</h3>
-     </div>
+
     </section>
   </main>
 </div>
