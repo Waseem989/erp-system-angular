@@ -1,32 +1,37 @@
 import { Component ,OnInit} from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 @Component({
   selector: 'app-student-dashboard',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './student-dashboard.html',
   styleUrl: './student-dashboard.css'
 })
 export class StudentDashboard implements OnInit{
-  student: any;
-  sidebarOpen: boolean = false;
-
-  attendanceSummary = 'Present: 20, Absent: 2';
-  gradeSummary = 'Average: 88%';
-  testSummary = '3 Tests Attempted';
+  isSidebarOpen = false;
+  studentName = 'John Smith';
+  studentPic = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
 
   constructor(private auth: AuthService, private router: Router) {}
 
   ngOnInit(): void {
-    this.student = this.auth.getUser(); // Assuming it returns current logged-in student
+   const user = JSON.parse(localStorage.getItem('user') || '{}');
+    this.studentName = user.name || 'student';
   }
 
   toggleSidebar() {
-    this.sidebarOpen = !this.sidebarOpen;
+     this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+   navigate(path: string) {
+    this.router.navigate([`/student/${path}`]);
+    this.toggleSidebar();
   }
 
   logout() {
-    this.auth.logout();
+ localStorage.removeItem('user');
     this.router.navigate(['/login']);
   }
 }

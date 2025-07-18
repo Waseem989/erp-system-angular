@@ -1,0 +1,45 @@
+{
+  "admins": [
+    { "id": 1, "username": "admin1", "password": "admin123", "name": "John Admin" },
+    { "id": 2, "username": "admin2", "password": "admin456", "name": "Alice Admin" }
+  ],
+  "teachers": [
+    { "id": 1, "email": "teacher1@example.com", "password": "teach123", "name": "Mr. Smith" },
+    { "id": 2, "email": "teacher2@example.com", "password": "teach456", "name": "Ms. Brown" },
+    { "id": 3, "email": "teacher3@example.com", "password": "teach789", "name": "Mr. Khan" },
+    { "id": 4, "email": "teacher4@example.com", "password": "teach000", "name": "Ms. Patel" }
+  ],
+  "students": [
+    { "id": 1, "rollNo": "101", "password": "stud101", "name": "Ali Ahmed", "class": "10A" },
+    { "id": 2, "rollNo": "102", "password": "stud102", "name": "Sara Khan", "class": "10B" },
+    { "id": 3, "rollNo": "103", "password": "stud103", "name": "Usman Raza", "class": "9A" },
+    { "id": 4, "rollNo": "104", "password": "stud104", "name": "Fatima Noor", "class": "9B" },
+    { "id": 5, "rollNo": "105", "password": "stud105", "name": "Hassan Ali", "class": "8A" },
+    { "id": 6, "rollNo": "106", "password": "stud106", "name": "Maryam Iqbal", "class": "8B" },
+    { "id": 7, "rollNo": "107", "password": "stud107", "name": "Bilal Khan", "class": "7A" },
+    { "id": 8, "rollNo": "108", "password": "stud108", "name": "Ayesha Malik", "class": "7B" },
+    { "id": 9, "rollNo": "109", "password": "stud109", "name": "Hamza Tariq", "class": "6A" },
+    { "id": 10, "rollNo": "110", "password": "stud110", "name": "Zara Shah", "class": "6B" }
+  ],
+  "classes": [
+    { "id": 1, "name": "10A", "teacher": "Mr. Smith" },
+    { "id": 2, "name": "10B", "teacher": "Ms. Brown" },
+    { "id": 3, "name": "9A", "teacher": "Mr. Khan" },
+    { "id": 4, "name": "9B", "teacher": "Ms. Patel" }
+  ],
+  "subjects": [
+    { "id": 1, "name": "Mathematics", "class": "10A" },
+    { "id": 2, "name": "Science", "class": "10B" },
+    { "id": 3, "name": "English", "class": "9A" }
+  ],
+  "attendance": [
+    { "id": 1, "studentId": 1, "date": "2025-07-18", "status": "Present" },
+    { "id": 2, "studentId": 2, "date": "2025-07-18", "status": "Absent" }
+  ],
+  "tests": [
+    { "id": 1, "class": "10A", "subject": "Math", "marks": 50, "maxMarks": 100 }
+  ],
+  "notices": [
+    { "id": 1, "title": "Holiday Notice", "message": "School will remain closed on Friday." }
+  ]
+}

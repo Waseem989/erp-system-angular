@@ -1,1 +1,71 @@
-<p>teacher-dashboard works!</p>
+<div class="dashboard-container">
+  <!-- Header -->
+  <header class="header" [class.shifted]="isSidebarOpen">
+    <button class="menu-btn" (click)="toggleSidebar()">☰</button>
+    <h1>Teacher Dashboard</h1>
+    <div class="header-right">
+      <span>{{ teacherName }}</span>
+      <button (click)="logout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.open]="isSidebarOpen">
+    <div class="profile">
+      <img [src]="teacherPic" alt="Teacher photo">
+      <h4>{{ teacherName }}</h4>
+    </div>
+    
+    <nav>
+      <ul>
+        <li (click)="navigate('teacher-dashboard')"> Dashboard</li>
+        <li (click)="navigate('attendance')"> Attendance</li>
+        <li (click)="navigate('marks')"> Marks / Grades</li>
+        <li (click)="navigate('notices')">📢 Notices</li>
+        <li (click)="logout()"> Logout</li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Overlay for mobile -->
+  <div class="overlay" *ngIf="isSidebarOpen" (click)="toggleSidebar()"></div>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Stats Section -->
+    <section class="stats-container">
+      <div class="stat-card classes">
+        <h2>{{ totalClasses }}</h2>
+        <p>My Classes</p>
+      </div>
+      <div class="stat-card attendance">
+        <h2>{{ totalAttendance }}</h2>
+        <p>Attendance Taken</p>
+      </div>
+      <div class="stat-card tests">
+        <h2>{{ totalTests }}</h2>
+        <p>Tests Created</p>
+      </div>
+      <div class="stat-card notices">
+        <h2>{{ totalNotices }}</h2>
+        <p>Notices</p>
+      </div>
+    </section>
+
+    <!-- Quick Access Cards -->
+    <section class="cards-container">
+      <div class="card" (click)="navigate('my-classes')">
+         <h3>My Classes</h3> 
+      </div>
+      <div class="card" (click)="navigate('attendance')">
+        <h3> 📝 Attendance</h3>
+      </div>
+      <div class="card" (click)="navigate('marks')">
+        <h3> 📊 Marks / Grades</h3>
+       </div>
+      <div class="card" (click)="navigate('notices')">
+      <h3> 📢 Notice</h3>
+     </div>
+    </section>
+  </main>
+</div>
