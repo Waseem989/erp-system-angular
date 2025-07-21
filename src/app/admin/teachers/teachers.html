@@ -2,13 +2,14 @@
   <h2>Teacher Enrollment</h2>
 
   <!-- Enroll Button + Search -->
-  </div>
-   <div class="header-row">
+  
+  <div class="header-row">
     <button class="enroll-btn" (click)="openForm()">+ Enroll teacher</button>
     <div class="search-box">
       <input type="text" placeholder="Search by Roll No, Name, Email, Phone, Class or Section"
              [(ngModel)]="searchTerm" (click)="searchTeachers()">
       <button (click)="searchTeachers()">Search</button>
+    </div>
   </div>
 
 
@@ -32,12 +33,12 @@
     <tbody>
       <tr *ngFor="let teacher of filteredTeachers; let i = index">
         <td>{{ teacher.id }}</td>
-        <td>{{ teacher.name }}</td>
+        <td>{{ teacher.teacherNane }}</td>
         <td>{{ teacher.fatherName }}</td>
         <td>{{ teacher.phone }}</td>
         <td>{{ teacher.email }}</td>
         <td>{{ teacher.address }}</td>
-        <td>{{ teacher.subjects }}</td>
+        <td>{{ teacher.subject }}</td>
         <td>{{ teacher.class }}</td>
         <td>
           <img [src]="teacher.profilePic" alt="Profile" width="50" height="50">
