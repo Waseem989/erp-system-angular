@@ -1,6 +1,8 @@
 # CollegeErp
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.0.5.
+<img width="1349" height="535" alt="image" src="https://github.com/user-attachments/assets/17a47bf9-1eb0-4d7e-b366-7d373183e394" />
+
 
 ## Development server
 
