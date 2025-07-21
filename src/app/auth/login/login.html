@@ -1,50 +1,20 @@
-<!-- Wrap everything in a form for Angular submit -->
-<form class="login-container" (ngSubmit)="onLogin()" #loginForm="ngForm">
-  <div id="body">
-    <div style="width: 30%;">
-      <h1>Global Education</h1>
-      <h4>
-        There are many variations of passages of Lorem Ipsum available, but the
-        majority have suffered alteration in some form, by injected humour,
-      </h4>
+<form class="login-container" (ngSubmit)="onLogin()" #loginForm="ngForm" novalidate>
+  <div class="login-box">
+    <h2>ERP Login</h2>
+    <p class="subtitle">Admin: use email | Student: use rollNo</p>
+
+    <div class="form-group">
+      <label for="username">Email / RollNo</label>
+      <input id="username" name="username" type="text" [(ngModel)]="username" required />
     </div>
 
-    <div class="login-container">
-      <div class="login-header">
-        <h2>ERP Login</h2>
-      </div>
-
-      <div class="login-form">
-        <!-- Username -->
-        <div class="form-group">
-          <label for="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            [(ngModel)]="username"
-            required
-          />
-        </div>
-
-        <!-- Password -->
-        <div class="form-group">
-          <label for="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            [(ngModel)]="password"
-            required
-          />
-        </div>
-
-        <!-- Error Message -->
-        <p *ngIf="errorMsg" style="color:red;">{{ errorMsg }}</p>
-
-        <!-- Login Button -->
-        <button type="submit" class="login-button">Login</button>
-      </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" [(ngModel)]="password" required />
     </div>
+
+    <p *ngIf="errorMsg" class="error">{{ errorMsg }}</p>
+
+    <button type="submit">Login</button>
   </div>
 </form>

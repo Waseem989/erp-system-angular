@@ -6,6 +6,7 @@ import { Classes } from './admin/classes/classes';
 import { Notices } from './admin/notices/notices';
 import { Students } from './admin/students/students';
 import { Teachers } from './admin/teachers/teachers';
+import { ClassSection } from './admin/class-section/class-section';
 
 import { TeacherDashboard } from './teacher/teacher-dashboard/teacher-dashboard';
 import { MyClasses } from './teacher/my-classes/my-classes';
@@ -21,6 +22,7 @@ import { adminGuard, teacherGuard, studentGuard } from './guards/role.guard';
 
 import { NotFound } from './shared/not-found/not-found';
 
+
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: Login },
@@ -35,7 +37,8 @@ export const routes: Routes = [
       { path: 'classes', component: Classes },
       { path: 'notices', component: Notices },
       { path: 'students', component: Students },
-      { path: 'teachers', component: Teachers }
+      { path: 'teachers', component: Teachers },
+      { path: 'class', component: ClassSection}
     ]
   },
 

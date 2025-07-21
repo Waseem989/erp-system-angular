@@ -1,1 +1,82 @@
-<p> admin crud students works!</p>
+<div class="container">
+  <h2>Student Enrollment</h2>
+
+  <div class="header-row">
+    <button class="enroll-btn" (click)="openForm()">+ Enroll Student</button>
+    <div class="search-box">
+      <input type="text" placeholder="Search by Roll No, Name, Email, Phone, Class or Section"
+             [(ngModel)]="searchText" (input)="searchStudent()">
+      <button (click)="searchStudent()">Search</button>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Student Name</th>
+        <th>Father Name</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>Class</th>
+        <th>Section</th>
+        <th>Roll No</th>
+        <th>Subjects</th>
+        <th>Profile Pic</th>
+        <th>Password</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let s of filteredStudents">
+        <td>{{ s.id }}</td>
+        <td>{{ s.studentName }}</td>
+        <td>{{ s.fatherName }}</td>
+        <td>{{ s.phone }}</td>
+        <td>{{ s.email }}</td>
+        <td>{{ s.class }}</td>
+        <td>{{ s.sectionClass }}</td>
+        <td>{{ s.rollNo }}</td>
+        <td>
+          <select>
+            <option *ngFor="let sub of s.subjects">{{ sub }}</option>
+          </select>
+        </td>
+        <td><img [src]="s.studentpic" alt="Profile" width="40" height="40"></td>
+        <td>{{ s.password }}</td>
+        <td>
+          <button class="update-btn" (click)="openForm(s)">Update</button>
+          <button class="delete-btn" (click)="deleteStudent(s.id)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Popup Form -->
+<div class="popup" [class.show]="showForm">
+  <div class="popup-content">
+    <h3>{{ editingId ? 'Update Student' : 'Enroll Student' }}</h3>
+    <form (ngSubmit)="saveStudent()">
+      <input type="text" name="studentName" [(ngModel)]="formData.studentName" placeholder="Student Name" required>
+      <input type="text" name="fatherName" [(ngModel)]="formData.fatherName" placeholder="Father Name" required>
+      <input type="text" name="phone" [(ngModel)]="formData.phone" placeholder="Phone" required>
+      <input type="email" name="email" [(ngModel)]="formData.email" placeholder="Email" required>
+      <input type="text" name="class" [(ngModel)]="formData.class" placeholder="Class" required>
+      <input type="text" name="sectionClass" [(ngModel)]="formData.sectionClass" placeholder="Section" required>
+      <input type="text" name="rollNo" [(ngModel)]="formData.rollNo" placeholder="Roll No" required>
+      <input type="text" name="subjects" [(ngModel)]="formData.subjects" placeholder="Subjects (comma separated)" required>
+      <input type="text" name="studentpic" [(ngModel)]="formData.studentpic" placeholder="Profile Pic URL">
+      <input type="file" accept="image/*" (change)="onFileSelect($event)">
+      <div *ngIf="formData.studentpic" style="margin:10px 0;">
+        <img [src]="formData.studentpic" alt="Preview" width="80" height="80">
+      </div>
+      <input type="password" name="password" [(ngModel)]="formData.password" placeholder="Password" required>
+      <div class="form-actions">
+        <button type="submit">Save</button>
+        <button type="button" (click)="closeForm()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>

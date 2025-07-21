@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-classes',
@@ -7,5 +8,8 @@ import { Component } from '@angular/core';
   styleUrl: './classes.css'
 })
 export class Classes {
-
+constructor(private router: Router) {}
+    goTo(page: string) {
+    this.router.navigate([`/admin/${page}`]);
+  }
 }
