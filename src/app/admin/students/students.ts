@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -12,30 +12,28 @@ import { FormsModule } from '@angular/forms';
 })
 export class Students implements OnInit {
 
-  // Lists
   students: any[] = [];
   filteredStudents: any[] = [];
-
-  // UI
   showForm = false;
-  editingId: string | null = null;
+  editingId: number | null = null;
   searchText = '';
 
-  // Form model (NOTE: class + sectionClass ALAG)
   formData: any = {
-    studentName: '',
-    fatherName: '',
-    phone: '',
+    name: '',
+    father_name: '',
+    phone_number: '',
     email: '',
+    address: '',
     class: '',
-    sectionClass: '',
-    rollNo: '',
-    subjects: '',      // comma separated in form
-    studentpic: '',
+    section: '',
+    roll_number: '',
+    profile_pic: '',
     password: ''
   };
 
-  private apiUrl = 'https://686ce46214219674dcc98cf2.mockapi.io/students';
+  private listUrl = 'http://192.168.100.71:8000/api/admin/students';  // For GET
+  private itemUrl = 'http://192.168.100.71:8000/api/admin/student';  // For POST/PUT/DELETE
+  private token = 'C3L613pL9SED0ab6mj3sQcVm8s1nZ2Jc0SiAvMtjaf875eb4';
 
   constructor(private http: HttpClient) {}
 
@@ -43,59 +41,42 @@ export class Students implements OnInit {
     this.getStudents();
   }
 
-  /* -------- GET All -------- */
+  private getHeaders() {
+    return {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${this.token}`,
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      })
+    };
+  }
+
+  /** GET Students */
   getStudents() {
-    this.http.get<any[]>(this.apiUrl).subscribe({
-      next: (data) => {
-        // normalize subjects -> array
-        this.students = data.map(s => ({
-          ...s,
-          subjects: Array.isArray(s.subjects)
-            ? s.subjects
-            : s.subjects
-              ? Object.values(s.subjects)
-              : []
-        }));
+    this.http.get<any>(this.listUrl, this.getHeaders()).subscribe({
+      next: res => {
+        this.students = res?.students || [];
         this.filteredStudents = [...this.students];
-        console.log('Students loaded:', this.students);
       },
-      error: (err) => console.error('GET error:', err)
+      error: err => console.error('GET error:', err)
     });
   }
 
-  /* -------- Search -------- */
+  /** Search */
   searchStudent() {
     const term = this.searchText.toLowerCase().trim();
-    if (!term) {
-      this.filteredStudents = [...this.students];
-      return;
-    }
     this.filteredStudents = this.students.filter(s =>
-      (s.studentName?.toLowerCase() ?? '').includes(term) ||
-      (s.rollNo?.toLowerCase() ?? '').includes(term) ||
-      (s.email?.toLowerCase() ?? '').includes(term) ||
-      (s.phone?.toLowerCase() ?? '').includes(term) ||
-      (s.class?.toLowerCase() ?? '').includes(term) ||
-      (s.sectionClass?.toLowerCase() ?? '').includes(term)
+      (s.name ?? '').toLowerCase().includes(term) ||
+      (s.email ?? '').toLowerCase().includes(term) ||
+      (s.roll_number ?? '').toLowerCase().includes(term)
     );
   }
 
-  /* -------- Open / Close Form -------- */
+  /** Open Form */
   openForm(student?: any) {
     if (student) {
       this.editingId = student.id;
-      this.formData = {
-        studentName: student.studentName ?? '',
-        fatherName: student.fatherName ?? '',
-        phone: student.phone ?? '',
-        email: student.email ?? '',
-        class: student.class ?? '',
-        sectionClass: student.sectionClass ?? '',
-        rollNo: student.rollNo ?? '',
-        subjects: (Array.isArray(student.subjects) ? student.subjects : []).join(', '),
-        studentpic: student.studentpic ?? '',
-        password: student.password ?? ''
-      };
+      this.formData = { ...student, password: '' };
     } else {
       this.editingId = null;
       this.resetForm();
@@ -110,80 +91,54 @@ export class Students implements OnInit {
 
   resetForm() {
     this.formData = {
-      studentName: '',
-      fatherName: '',
-      phone: '',
+      name: '',
+      father_name: '',
+      phone_number: '',
       email: '',
+      address: '',
       class: '',
-      sectionClass: '',
-      rollNo: '',
-      subjects: '',
-      studentpic: '',
+      section: '',
+      roll_number: '',
+      profile_pic: '',
       password: ''
     };
   }
 
-  /* -------- File Upload -> base64 -------- */
-  onFileSelect(event: any) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e: any) => {
-      this.formData.studentpic = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
-
-  /* -------- Save (POST/PUT) -------- */
+  /** Save (POST/PUT) */
   saveStudent() {
-    const payload = {
-      studentName: this.formData.studentName.trim(),
-      fatherName: this.formData.fatherName.trim(),
-      phone: this.formData.phone.trim(),
-      email: this.formData.email.trim(),
-      class: this.formData.class.trim(),
-      sectionClass: this.formData.sectionClass.trim(),
-      rollNo: this.formData.rollNo.trim(),
-      password: this.formData.password,
-      studentpic: this.formData.studentpic,
-      subjects: this.formData.subjects
-        .split(',')
-        .map((s: string) => s.trim())
-        .filter((s: string) => s.length > 0)
-    };
-
-    console.log(this.editingId ? 'PUT payload:' : 'POST payload:', payload);
+    const payload = { ...this.formData };
+    console.log('Payload:', payload);
 
     if (this.editingId) {
-      this.http.put(`${this.apiUrl}/${this.editingId}`, payload).subscribe({
-        next: (res) => {
-          console.log('PUT ok:', res);
-          this.closeForm();
-          this.getStudents();
-        },
-        error: (err) => console.error('PUT error:', err)
-      });
+      // PUT (update student)
+      this.http.put(`${this.itemUrl}/${this.editingId}`, payload, this.getHeaders())
+        .subscribe({
+          next: () => {
+            this.closeForm();
+            this.getStudents();
+          },
+          error: err => console.error('PUT error:', err)
+        });
     } else {
-      this.http.post(this.apiUrl, payload).subscribe({
-        next: (res) => {
-          console.log('POST ok:', res);
-          this.closeForm();
-          this.getStudents();
-        },
-        error: (err) => console.error('POST error:', err)
-      });
+      // POST (new student)
+      this.http.post(this.itemUrl, payload, this.getHeaders())
+        .subscribe({
+          next: () => {
+            this.closeForm();
+            this.getStudents();
+          },
+          error: err => console.error('POST error:', err)
+        });
     }
   }
 
-  /* -------- Delete -------- */
-  deleteStudent(id: string) {
+  /** Delete */
+  deleteStudent(id: number) {
     if (!confirm('Delete this student?')) return;
-    this.http.delete(`${this.apiUrl}/${id}`).subscribe({
-      next: (res) => {
-        console.log('DELETE ok:', res);
-        this.getStudents();
-      },
-      error: (err) => console.error('DELETE error:', err)
-    });
+    this.http.delete(`${this.itemUrl}/${id}`, this.getHeaders())
+      .subscribe({
+        next: () => this.getStudents(),
+        error: err => console.error('DELETE error:', err)
+      });
   }
 }

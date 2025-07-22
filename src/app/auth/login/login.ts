@@ -19,97 +19,98 @@ export class Login {
   private http = inject(HttpClient);
   private router = inject(Router);
 
-  private ADMIN_API   = 'https://687e1dc6c07d1a878c315c88.mockapi.io/Admin';
-  private STUDENT_API = 'https://686ce46214219674dcc98cf2.mockapi.io/students';
-  private TEACHER_API = 'https://687e1dc6c07d1a878c315c88.mockapi.io/Teachers';
+  // REAL API ENDPOINTS (all POST; no token required at login)
+  private ADMIN_API   = 'http://192.168.100.71:8000/api/admin/login';
+  private TEACHER_API = 'http://192.168.100.71:8000/api/teacher/login';
+  private STUDENT_API = 'http://192.168.100.71:8000/api/student/login';
 
   onLogin() {
     this.errorMsg = '';
-    const u = this.username.trim();
-    const p = this.password.trim();
+    const email = this.username.trim();
+    const p     = this.password.trim();
 
-    if (!u || !p) {
-      this.errorMsg = 'Username and Password required!';
+    if (!email || !p) {
+      this.errorMsg = 'Email and Password required!';
       return;
     }
 
-    if (u.includes('@')) {
-      // Email → Check Admin then Teacher
-      this.loginAdminOrTeacher(u, p);
-    } else {
-      // RollNo → Student
-      this.loginStudent(u, p);
-    }
+    // Try Admin → Teacher → Student
+    this.loginAdmin(email, p);
   }
 
-  // ===================== ADMIN THEN TEACHER =====================
-  private loginAdminOrTeacher(email: string, password: string) {
-    this.http.get<any[]>(this.ADMIN_API).subscribe({
-      next: admins => {
-        const admin = admins.find(a => a.email === email && a.password === password);
-        if (admin) {
+  /* ---------------- ADMIN ---------------- */
+  private loginAdmin(email: string, password: string) {
+    this.http.post<any>(this.ADMIN_API, { email, password }).subscribe({
+      next: res => {
+        if (this.isSuccess(res)) {
           this.setUserAndRedirect({
             role: 'admin',
-            name: admin.adminName,
-            email: admin.email
+            name: res?.user?.name || res?.adminName || email,
+            email,
+            token: res?.token || res?.access_token || null
           }, '/admin');
-          return;
+        } else {
+          this.loginTeacher(email, password);
         }
-        this.loginTeacher(email, password);
       },
-      error: err => {
-        console.error('Admin API Error:', err);
-        this.loginTeacher(email, password);
-      }
+      error: _ => this.loginTeacher(email, password)
     });
   }
 
-  // ===================== TEACHER LOGIN =====================
+  /* ---------------- TEACHER ---------------- */
   private loginTeacher(email: string, password: string) {
-    this.http.get<any[]>(this.TEACHER_API).subscribe({
-      next: teachers => {
-        const teacher = teachers.find(t => t.email === email && t.password === password);
-        if (teacher) {
+    this.http.post<any>(this.TEACHER_API, { email, password }).subscribe({
+      next: res => {
+        if (this.isSuccess(res)) {
           this.setUserAndRedirect({
             role: 'teacher',
-            id: teacher.id,
-            name: teacher.teacherNane || teacher.teacherName || teacher.name || 'Teacher',
-            email: teacher.email
+            id:   res?.user?.id   || res?.id   || null,
+            name: res?.user?.name || res?.teacherName || 'Teacher',
+            email,
+            profilePic: res?.user?.profilePic || ''
           }, '/teacher');
         } else {
-          this.errorMsg = 'Invalid teacher credentials!';
+          this.loginStudent(email, password);
         }
       },
-      error: err => {
-        console.error('Teacher API Error:', err);
-        this.errorMsg = 'Unable to connect to teacher API!';
-      }
+      error: _ => this.loginStudent(email, password)
     });
   }
 
-  // ===================== STUDENT LOGIN =====================
-  private loginStudent(rollNo: string, password: string) {
-    this.http.get<any[]>(this.STUDENT_API).subscribe({
-      next: students => {
-        const student = students.find(s => s.rollNo === rollNo && s.password === password);
-        if (student) {
+  /* ---------------- STUDENT (email login) ---------------- */
+  private loginStudent(email: string, password: string) {
+    this.http.post<any>(this.STUDENT_API, { email, password }).subscribe({
+      next: res => {
+        if (this.isSuccess(res)) {
           this.setUserAndRedirect({
             role: 'student',
-            name: student.studentName,
-            rollNo: student.rollNo
+            name:   res?.user?.studentName || res?.user?.name || email,
+            email,
+            rollNo: res?.user?.rollNo || null
           }, '/student');
         } else {
-          this.errorMsg = 'Invalid student credentials!';
+          this.errorMsg = 'Invalid credentials!';
         }
       },
       error: err => {
         console.error('Student API Error:', err);
-        this.errorMsg = 'Unable to connect to student API!';
+        this.errorMsg = 'Invalid credentials!';
       }
     });
   }
 
-  // ===================== SAVE USER & REDIRECT =====================
+  /* ---------------- SUCCESS HELPER ---------------- */
+  private isSuccess(res: any): boolean {
+    if (!res) return false;
+    if (res.success === true) return true;
+    if (res.status === true) return true;
+    if (res.token || res.access_token) return true;
+    if (res.user) return true;
+    if (res.data) return true;
+    return false;
+  }
+
+  /* ---------------- SAVE & ROUTE ---------------- */
   private setUserAndRedirect(payload: any, route: string) {
     localStorage.setItem('user', JSON.stringify(payload));
     this.router.navigate([route]);

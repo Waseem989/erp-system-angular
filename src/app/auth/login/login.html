@@ -1,11 +1,11 @@
 <form class="login-container" (ngSubmit)="onLogin()" #loginForm="ngForm" novalidate>
   <div class="login-box">
     <h2>ERP Login</h2>
-    <p class="subtitle">Admin/Teacher: use email | Student: use rollNo</p>
+    <p class="subtitle">Login with your email (Admin / Teacher / Student)</p>
 
     <div class="form-group">
-      <label for="username">Email / RollNo</label>
-      <input id="username" name="username" type="text" [(ngModel)]="username" required />
+      <label for="username">Email</label>
+      <input id="username" name="username" type="email" [(ngModel)]="username" required />
     </div>
 
     <div class="form-group">
