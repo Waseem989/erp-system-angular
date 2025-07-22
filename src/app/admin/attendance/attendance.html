@@ -1,28 +1,38 @@
 <div class="container">
   <h2>Teacher Attendance</h2>
 
-  <table>
+  <!-- Debug toggle: uncomment to inspect incoming data -->
+  <!-- <pre>{{ teachers | json }}</pre> -->
+
+  <table *ngIf="teachers.length; else noData">
     <thead>
       <tr>
         <th>ID</th>
         <th>Teacher Name</th>
         <th>Email</th>
+        <th>Date</th>
+        <th>%</th>
         <th>Status</th>
-        <th>Mark Attendance</th>
+        <th>Mark</th>
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
+      <tr *ngFor="let t of teachers">
+        <td>{{ t.id }}</td>
+        <td>{{ t.teacherNane || t.teacherName || t.name }}</td>
+        <td>{{ t.email }}</td>
+        <td>{{ today }}</td>
+        <td>{{ getPercentage(t.id) }}%</td>
+        <td>{{ attendanceMap[t.id] || '—' }}</td>
         <td>
-          <button class="present-btn" >Present</button>
-          <button class="absent-btn" >Absent</button>
+          <button class="present-btn" (click)="markAttendance(t, 'present')">Present</button>
+          <button class="absent-btn"  (click)="markAttendance(t, 'absent')">Absent</button>
         </td>
       </tr>
     </tbody>
   </table>
-</div>
 
+  <ng-template #noData>
+    <p class="no-data">No teacher records found.</p>
+  </ng-template>
+</div>

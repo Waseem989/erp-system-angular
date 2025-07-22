@@ -19,9 +19,9 @@ export class Login {
   private http = inject(HttpClient);
   private router = inject(Router);
 
-  // APIs
-  private ADMIN_API = 'https://687e1dc6c07d1a878c315c88.mockapi.io/Admin';
+  private ADMIN_API   = 'https://687e1dc6c07d1a878c315c88.mockapi.io/Admin';
   private STUDENT_API = 'https://686ce46214219674dcc98cf2.mockapi.io/students';
+  private TEACHER_API = 'https://687e1dc6c07d1a878c315c88.mockapi.io/Teachers';
 
   onLogin() {
     this.errorMsg = '';
@@ -33,34 +33,56 @@ export class Login {
       return;
     }
 
-    // Agar email hai toh admin check kare
     if (u.includes('@')) {
-      this.loginAdmin(u, p);
+      // Email → Check Admin then Teacher
+      this.loginAdminOrTeacher(u, p);
     } else {
-      // Otherwise student
+      // RollNo → Student
       this.loginStudent(u, p);
     }
   }
 
-  // ===================== ADMIN LOGIN =====================
-  private loginAdmin(email: string, password: string) {
+  // ===================== ADMIN THEN TEACHER =====================
+  private loginAdminOrTeacher(email: string, password: string) {
     this.http.get<any[]>(this.ADMIN_API).subscribe({
-      next: (admins) => {
+      next: admins => {
         const admin = admins.find(a => a.email === email && a.password === password);
         if (admin) {
-          localStorage.setItem('user', JSON.stringify({
+          this.setUserAndRedirect({
             role: 'admin',
             name: admin.adminName,
             email: admin.email
-          }));
-          this.router.navigate(['/admin']);
+          }, '/admin');
+          return;
+        }
+        this.loginTeacher(email, password);
+      },
+      error: err => {
+        console.error('Admin API Error:', err);
+        this.loginTeacher(email, password);
+      }
+    });
+  }
+
+  // ===================== TEACHER LOGIN =====================
+  private loginTeacher(email: string, password: string) {
+    this.http.get<any[]>(this.TEACHER_API).subscribe({
+      next: teachers => {
+        const teacher = teachers.find(t => t.email === email && t.password === password);
+        if (teacher) {
+          this.setUserAndRedirect({
+            role: 'teacher',
+            id: teacher.id,
+            name: teacher.teacherNane || teacher.teacherName || teacher.name || 'Teacher',
+            email: teacher.email
+          }, '/teacher');
         } else {
-          this.errorMsg = 'Invalid admin credentials!';
+          this.errorMsg = 'Invalid teacher credentials!';
         }
       },
-      error: (err) => {
-        console.error('Admin API Error:', err);
-        this.errorMsg = 'Unable to connect to admin API!';
+      error: err => {
+        console.error('Teacher API Error:', err);
+        this.errorMsg = 'Unable to connect to teacher API!';
       }
     });
   }
@@ -68,23 +90,28 @@ export class Login {
   // ===================== STUDENT LOGIN =====================
   private loginStudent(rollNo: string, password: string) {
     this.http.get<any[]>(this.STUDENT_API).subscribe({
-      next: (students) => {
+      next: students => {
         const student = students.find(s => s.rollNo === rollNo && s.password === password);
         if (student) {
-          localStorage.setItem('user', JSON.stringify({
+          this.setUserAndRedirect({
             role: 'student',
             name: student.studentName,
             rollNo: student.rollNo
-          }));
-          this.router.navigate(['/student']);
+          }, '/student');
         } else {
           this.errorMsg = 'Invalid student credentials!';
         }
       },
-      error: (err) => {
+      error: err => {
         console.error('Student API Error:', err);
         this.errorMsg = 'Unable to connect to student API!';
       }
     });
+  }
+
+  // ===================== SAVE USER & REDIRECT =====================
+  private setUserAndRedirect(payload: any, route: string) {
+    localStorage.setItem('user', JSON.stringify(payload));
+    this.router.navigate([route]);
   }
 }

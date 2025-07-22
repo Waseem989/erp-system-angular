@@ -20,12 +20,12 @@ export class Teachers implements OnInit {
   apiURL = 'https://687e1dc6c07d1a878c315c88.mockapi.io/Teachers';
 
   formData: any = {
-    name: '',
+    teacherNane: '',
     fatherName: '',
     phone: '',
     email: '',
     address: '',
-    subjects: '',
+    subject: '',
     class: '',
     profilePic: '',
     password: ''
