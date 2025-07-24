@@ -1,1 +1,11 @@
-<p>class-section works!</p>
+<h2>{{ className }}</h2>
+
+<p><strong>Teacher:</strong> {{ teacher?.name }} ({{ teacher?.subject }})</p>
+
+<h3>Enrolled Students:</h3>
+<ul>
+  <li *ngFor="let s of students">
+    {{ s.name }} - {{ s.subject }}
+  </li>
+</ul>
+

@@ -20,9 +20,9 @@ export class Login {
   private router = inject(Router);
 
   // REAL API ENDPOINTS (all POST; no token required at login)
-  private ADMIN_API   = 'http://192.168.100.71:8000/api/admin/login';
-  private TEACHER_API = 'http://192.168.100.71:8000/api/teacher/login';
-  private STUDENT_API = 'http://192.168.100.71:8000/api/student/login';
+  private ADMIN_API   = 'http://192.168.1.107:8000/api/admin/login';
+  private TEACHER_API = 'http://192.168.1.107:8000/api/teacher/login';
+  private STUDENT_API = 'http://192.168.1.107:8000/api/student/login';
 
   onLogin() {
     this.errorMsg = '';

@@ -1,10 +1,25 @@
 <div class="container">
   <h2>Students</h2>
-  <button (click)="openForm()">+ Add Student</button>
 
-  <input type="text" placeholder="Search..." [(ngModel)]="searchText" (input)="searchStudent()">
+  <div class="header-row">
+    <button class="enroll-btn" (click)="openForm()">+ Add Student</button>
 
-  <table *ngIf="filteredStudents.length">
+    <div class="search-box">
+      <input
+        type="text"
+        placeholder="Search..."
+        [(ngModel)]="searchText"
+        (input)="searchStudent()"
+      >
+      <button (click)="searchStudent()">Search</button>
+    </div>
+  </div>
+
+  <!-- Show loading -->
+  <div *ngIf="isLoading">Loading students...</div>
+
+  <!-- Student list -->
+  <table *ngIf="!isLoading && students.length">
     <thead>
       <tr>
         <th>ID</th>
@@ -13,6 +28,7 @@
         <th>Phone</th>
         <th>Email</th>
         <th>Class</th>
+        <th>Pic</th>
         <th>Roll</th>
         <th>Actions</th>
       </tr>
@@ -25,31 +41,49 @@
         <td>{{ s.phone_number }}</td>
         <td>{{ s.email }}</td>
         <td>{{ s.class }}</td>
+        <td>
+          <img [src]="s.profile_pic" alt="Profile" width="60" height="60">
+        </td>
         <td>{{ s.roll_number }}</td>
         <td>
-          <button (click)="openForm(s)">Edit</button>
-          <button (click)="deleteStudent(s.id)">Delete</button>
+          <button class="update-btn" (click)="openForm(s)">Edit</button>
+          <button class="delete-btn" (click)="deleteStudent(s.id)">Delete</button>
         </td>
       </tr>
     </tbody>
   </table>
 
-  <div class="popup" *ngIf="showForm">
+  <!-- Popup -->
+  <div class="popup" [ngClass]="{ 'show': showForm }">
     <div class="popup-content">
-      <form (ngSubmit)="saveStudent()">
+      <h3 *ngIf="!editingId">Enroll Student</h3>
+      <h3 *ngIf="editingId">Update Student</h3>
+
+      <form (ngSubmit)="saveStudent()" #studentForm="ngForm">
         <input type="text" [(ngModel)]="formData.name" name="name" placeholder="Name" required>
         <input type="text" [(ngModel)]="formData.father_name" name="father_name" placeholder="Father Name" required>
         <input type="text" [(ngModel)]="formData.phone_number" name="phone_number" placeholder="Phone" required>
         <input type="email" [(ngModel)]="formData.email" name="email" placeholder="Email" required>
         <input type="text" [(ngModel)]="formData.address" name="address" placeholder="Address" required>
         <input type="text" [(ngModel)]="formData.class" name="class" placeholder="Class" required>
-        <input type="text" [(ngModel)]="formData.section" name="section" placeholder="Section" required>
         <input type="text" [(ngModel)]="formData.roll_number" name="roll_number" placeholder="Roll Number" required>
-        <input type="text" [(ngModel)]="formData.profile_pic" name="profile_pic" placeholder="Profile Pic">
-        <input type="password" [(ngModel)]="formData.password" name="password" placeholder="Password" [required]="!editingId">
 
-        <button type="submit">Save</button>
-        <button type="button" (click)="closeForm()">Cancel</button>
+        <input type="file" accept="image/*" (change)="onFileSelect($event)">
+
+        <input
+          type="password"
+          [(ngModel)]="formData.password"
+          name="password"
+          placeholder="Password"
+          [required]="!editingId"
+        >
+
+        <div class="form-actions">
+          <button type="submit" [disabled]="isSaving">
+            {{ isSaving ? 'Saving...' : 'Save' }}
+          </button>
+          <button type="button" (click)="closeForm()">Cancel</button>
+        </div>
       </form>
     </div>
   </div>

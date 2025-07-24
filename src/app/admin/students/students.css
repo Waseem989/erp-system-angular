@@ -28,6 +28,7 @@
   cursor: pointer;
   margin-right: 50px;
 }
+
 .container {
   padding: 20px;
   font-family: Arial, sans-serif;
@@ -93,6 +94,7 @@ th {
   justify-content: center;
   align-items: center;
   padding: 10px;
+  z-index: 1000;
 }
 
 .popup.show {
@@ -104,8 +106,8 @@ th {
   padding: 20px;
   border-radius: 8px;
   width: 400px;
-  max-height: 90vh;     /* Scroll when content exceeds */
-  overflow-y: auto;      /* Enable vertical scroll */
+  max-height: 90vh;
+  overflow-y: auto;
   box-sizing: border-box;
 }
 
@@ -125,9 +127,7 @@ th {
 .form-actions {
   display: flex;
   justify-content: space-between;
-    /* Always visible */
-  bottom: 0;
-  background: white;  /* Background for clarity */
+  background: white;
   padding-top: 8px;
   border-top: 1px solid #eee;
 }

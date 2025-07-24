@@ -1,148 +1,116 @@
-import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
-type Status = 'present' | 'absent';
+type Status = 'present' | 'absent' | '—';
 
 interface Teacher {
-  id: string;
-  teacherNane?: string;   // your API’s typo field
-  teacherName?: string;
-  name?: string;
-  email?: string;
-}
-
-interface AttendanceRec {
-  id?: string;
-  teacherId: string;
-  teacherName?: string;
-  email?: string;
-  date: string; // YYYY-MM-DD
-  status: Status;
+  id: number;
+  name: string;
+  email: string;
+  status?: Status; // Latest attendance status
 }
 
 @Component({
   selector: 'app-attendance',
   standalone: true,
-  imports: [CommonModule, HttpClientModule],
+  imports: [CommonModule,FormsModule],
   templateUrl: './attendance.html',
-  styleUrls: ['./attendance.css'],
+  styleUrls: ['./attendance.css']
 })
 export class Attendanceteachers implements OnInit {
 
+   adminName = '';
+  adminPic = 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+  isSidebarOpen = false;
+
   private http = inject(HttpClient);
-  private cdr  = inject(ChangeDetectorRef);
+  private cdr = inject(ChangeDetectorRef);
 
   teachers: Teacher[] = [];
-  attendanceRecords: AttendanceRec[] = [];
-  attendanceMap: Record<string, Status | undefined> = {};
+  today = new Date().toISOString().split('T')[0];
 
-  // MockAPI endpoints
-  teacherApi    = 'https://687e1dc6c07d1a878c315c88.mockapi.io/Teachers';
-  attendanceApi = 'https://687e7ea1efe65e520086db7e.mockapi.io/tattendance';
+  private token = 'C3L613pL9SED0ab6mj3sQcVm8s1nZ2Jc0SiAvMtjaf875eb4';
+  private teacherApi = 'http://192.168.1.107:8000/api/admin/teachers';
+  private attendanceApi = 'http://192.168.1.107:8000/api/admin/teacher-attendance';
 
-  today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+
+    toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
 
   ngOnInit() {
+
+   
     this.loadTeachers();
   }
 
-  /* ---------------- Load Teachers ---------------- */
-  loadTeachers() {
-    this.http.get<Teacher[]>(this.teacherApi).subscribe({
-      next: (data) => {
-        this.teachers = (data ?? []).map(t => this.normalizeTeacher(t));
-        this.cdr.detectChanges();   // 🔥 force view update (zoneless)
-        this.loadAttendance();
-      },
-      error: (err) => {
-        console.error('Teachers API Error:', err);
-        this.teachers = [];
-        this.cdr.detectChanges();
-      },
-    });
-  }
-
-  private normalizeTeacher(t: Teacher): Teacher {
-    // guarantee we always have a name + id string
+  /** Auth Headers */
+  private getHeaders() {
     return {
-      ...t,
-      id: t.id?.toString() ?? '',
-      teacherNane: t.teacherNane ?? t.teacherName ?? t.name ?? '(no name)',
-      email: t.email ?? '',
+      headers: new HttpHeaders({
+        'Authorization': `Bearer ${this.token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      })
     };
   }
 
-  /* ---------------- Load Attendance ---------------- */
-  loadAttendance() {
-    this.http.get<AttendanceRec[]>(this.attendanceApi).subscribe({
-      next: (records) => {
-        this.attendanceRecords = records ?? [];
-        this.buildAttendanceMap();
-        this.cdr.detectChanges();   // 🔥 update view
+  /** Load teachers and their attendance status */
+  loadTeachers() {
+    this.http.get<any>(this.teacherApi, this.getHeaders()).subscribe({
+      next: res => {
+        const teachersList = res?.teachers || [];
+        this.teachers = teachersList.map((t: Teacher) => ({
+          ...t,
+          status: '—'
+        }));
+        this.loadTodayAttendance(); // Load today's attendance for all teachers
+        this.cdr.detectChanges();
       },
-      error: (err) => console.error('Attendance API Error:', err),
+      error: err => console.error('Teacher API Error:', err)
     });
   }
 
-  private buildAttendanceMap() {
-    this.attendanceMap = {};
-    for (const t of this.teachers) {
-      const rec = this.attendanceRecords.find(
-        r => r.teacherId == t.id && r.date == this.today
-      );
-      if (rec) this.attendanceMap[t.id] = rec.status;
-    }
+  /** Load today's attendance from backend */
+  loadTodayAttendance() {
+    this.http.get<any>(`${this.attendanceApi}?date=${this.today}`, this.getHeaders()).subscribe({
+      next: res => {
+        const attendanceRecords = res?.records || res || [];
+        this.teachers.forEach(teacher => {
+          const record = attendanceRecords.find((a: any) => a.teacher_id === teacher.id);
+          teacher.status = record ? record.status : '—';
+        });
+        this.cdr.detectChanges();
+      },
+      error: err => console.error('Attendance GET Error:', err)
+    });
   }
 
-  /* ---------------- Mark Attendance ---------------- */
+  /** Mark attendance and save to backend */
   markAttendance(teacher: Teacher, status: Status) {
-    const teacherId = teacher.id;
-    const today = this.today;
+    const payload = {
+      teacher_id: teacher.id,
+      email: teacher.email,
+      date: this.today,
+      status
+    };
 
-    // Find if today's record exists in memory
-    const existing = this.attendanceRecords.find(
-      r => r.teacherId == teacherId && r.date == today
-    );
+    console.log('Sending Attendance:', payload);
 
-    if (existing?.id) {
-      // Update
-      const payload: AttendanceRec = { ...existing, status };
-      this.http.put<AttendanceRec>(`${this.attendanceApi}/${existing.id}`, payload)
-        .subscribe({
-          next: () => this.afterMarkSuccess(teacherId, status),
-          error: err => console.error('Attendance update failed:', err),
-        });
-    } else {
-      // Create
-      const payload: AttendanceRec = {
-        teacherId,
-        teacherName: teacher.teacherNane ?? teacher.teacherName ?? teacher.name ?? '',
-        email: teacher.email ?? '',
-        date: today,
-        status,
-      };
-      this.http.post<AttendanceRec>(this.attendanceApi, payload)
-        .subscribe({
-          next: () => this.afterMarkSuccess(teacherId, status),
-          error: err => console.error('Attendance create failed:', err),
-        });
-    }
-  }
-
-  private afterMarkSuccess(teacherId: string, status: Status) {
-    // optimistic update
-    this.attendanceMap[teacherId] = status;
-    this.cdr.detectChanges();
-    // reload full attendance to stay in sync (optional but safer)
-    this.loadAttendance();
-  }
-
-  /* ---------------- % Helper ---------------- */
-  getPercentage(teacherId: string) {
-    const recs = this.attendanceRecords.filter(r => r.teacherId == teacherId);
-    if (!recs.length) return 0;
-    const present = recs.filter(r => r.status === 'present').length;
-    return ((present / recs.length) * 100).toFixed(0);
+    this.http.post(this.attendanceApi, payload, this.getHeaders()).subscribe({
+      next: () => {
+        teacher.status = status; // update UI
+        this.cdr.detectChanges();
+        alert(`${teacher.name} marked as ${status}`);
+      },
+      error: (err) => {
+        console.error('Attendance POST Error:', err);
+        alert('Failed to mark attendance: ' + JSON.stringify(err.error));
+      }
+    });
   }
 }

@@ -1,12 +1,69 @@
- <div class="dashboard-container">
-    <main>
-         <section class="cards-container">
-          <div class="card" (click)="goTo('class')">
-          <h3>Class 11</h3>
-          </div>
-         <div class="card" (click)="goTo('class')">
-          <h3>Class 12</h3>
-          </div>
-        </section>
-  </main>
+<h2>📚 Manage Classes</h2>
+<button (click)="openPopup()">+ Create Class</button>
+
+<!-- Popup -->
+<div class="popup" *ngIf="showPopup">
+  <div class="popup-content">
+    <h3>Create New Class</h3>
+
+    <label>Class Name:</label>
+    <input type="text" [(ngModel)]="className" placeholder="e.g. Math - 11" required>
+
+    <label>Select Class (e.g. 11, 12):</label>
+    <select [(ngModel)]="selectedClass" (change)="onClassChange()">
+      <option value="">-- Select Class --</option>
+      <option value="11">11</option>
+      <option value="12">12</option>
+    </select>
+
+    <label>Select Teacher:</label>
+    <select [(ngModel)]="selectedTeacherId">
+      <option value="">-- Select Teacher --</option>
+      <option *ngFor="let teacher of teachers" [value]="teacher.id">{{ teacher.name }}</option>
+    </select>
+
+    <h4>Students in Class {{ selectedClass }}</h4>
+    <table *ngIf="matchedStudents.length">
+      <thead>
+        <tr>
+          <th>Roll No</th>
+          <th>Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let student of matchedStudents">
+          <td>{{ student.roll_number }}</td>
+          <td>{{ student.name }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="!matchedStudents.length && selectedClass">No students found in this class.</p>
+
+    <div class="form-actions">
+      <button (click)="saveClass()">Save</button>
+      <button (click)="closePopup()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Show Created Classes -->
+<hr>
+<h3>🗂 Saved Classes</h3>
+<div *ngFor="let cls of savedClasses" class="class-box">
+  <h4>{{ cls.className }}</h4>
+  <p><strong>Teacher:</strong> {{ cls.teacherName }}</p>
+  <table>
+    <thead>
+      <tr>
+        <th>Roll No</th>
+        <th>Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let stu of cls.students">
+        <td>{{ stu.roll_number }}</td>
+        <td>{{ stu.name }}</td>
+      </tr>
+    </tbody>
+  </table>
 </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -17,6 +17,9 @@ export class Students implements OnInit {
   showForm = false;
   editingId: number | null = null;
   searchText = '';
+  isSaving = false;
+  isLoading = true;
+  selectedFile: File | null = null;
 
   formData: any = {
     name: '',
@@ -25,17 +28,16 @@ export class Students implements OnInit {
     email: '',
     address: '',
     class: '',
-    section: '',
     roll_number: '',
     profile_pic: '',
     password: ''
   };
 
-  private listUrl = 'http://192.168.100.71:8000/api/admin/students';  // For GET
-  private itemUrl = 'http://192.168.100.71:8000/api/admin/student';  // For POST/PUT/DELETE
+  private listUrl = 'http://192.168.1.107:8000/api/admin/students';
+  private itemUrl = 'http://192.168.1.107:8000/api/admin/student';
   private token = 'C3L613pL9SED0ab6mj3sQcVm8s1nZ2Jc0SiAvMtjaf875eb4';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.getStudents();
@@ -44,25 +46,27 @@ export class Students implements OnInit {
   private getHeaders() {
     return {
       headers: new HttpHeaders({
-        Authorization: `Bearer ${this.token}`,
-        'Content-Type': 'application/json',
-        Accept: 'application/json'
+        Authorization: `Bearer ${this.token}`
       })
     };
   }
 
-  /** GET Students */
   getStudents() {
+    this.isLoading = true;
     this.http.get<any>(this.listUrl, this.getHeaders()).subscribe({
       next: res => {
         this.students = res?.students || [];
         this.filteredStudents = [...this.students];
+        this.isLoading = false;
+        this.cdr.detectChanges(); // Force Angular to detect changes
       },
-      error: err => console.error('GET error:', err)
+      error: err => {
+        console.error('GET error:', err);
+        this.isLoading = false;
+      }
     });
   }
 
-  /** Search */
   searchStudent() {
     const term = this.searchText.toLowerCase().trim();
     this.filteredStudents = this.students.filter(s =>
@@ -72,11 +76,11 @@ export class Students implements OnInit {
     );
   }
 
-  /** Open Form */
   openForm(student?: any) {
     if (student) {
       this.editingId = student.id;
       this.formData = { ...student, password: '' };
+      this.selectedFile = null;
     } else {
       this.editingId = null;
       this.resetForm();
@@ -97,42 +101,54 @@ export class Students implements OnInit {
       email: '',
       address: '',
       class: '',
-      section: '',
       roll_number: '',
       profile_pic: '',
       password: ''
     };
+    this.selectedFile = null;
+    this.editingId = null;
   }
 
-  /** Save (POST/PUT) */
+  onFileSelect(event: any) {
+    const file: File | undefined = event.target?.files?.[0];
+    this.selectedFile = file || null;
+  }
+
   saveStudent() {
-    const payload = { ...this.formData };
-    console.log('Payload:', payload);
+    if (this.isSaving) return;
+    this.isSaving = true;
+    this.showForm = false;
 
-    if (this.editingId) {
-      // PUT (update student)
-      this.http.put(`${this.itemUrl}/${this.editingId}`, payload, this.getHeaders())
-        .subscribe({
-          next: () => {
-            this.closeForm();
-            this.getStudents();
-          },
-          error: err => console.error('PUT error:', err)
-        });
-    } else {
-      // POST (new student)
-      this.http.post(this.itemUrl, payload, this.getHeaders())
-        .subscribe({
-          next: () => {
-            this.closeForm();
-            this.getStudents();
-          },
-          error: err => console.error('POST error:', err)
-        });
+    const fd = new FormData();
+    Object.keys(this.formData).forEach(key => {
+      if (key !== 'profile_pic' && this.formData[key]) {
+        fd.append(key, this.formData[key]);
+      }
+    });
+
+    if (this.selectedFile) {
+      fd.append('profile_pic', this.selectedFile);
     }
+
+    const url = this.editingId
+      ? `${this.itemUrl}/${this.editingId}?_method=PUT`
+      : this.itemUrl;
+
+    this.http.post(url, fd, this.getHeaders()).subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.closeForm();
+        this.getStudents();
+        alert(this.editingId ? 'Student updated!' : 'Student added!');
+      },
+      error: err => {
+        this.isSaving = false;
+        console.error('Save error:', err);
+        alert('Save failed: ' + JSON.stringify(err.error));
+      }
+    });
   }
 
-  /** Delete */
   deleteStudent(id: number) {
     if (!confirm('Delete this student?')) return;
     this.http.delete(`${this.itemUrl}/${id}`, this.getHeaders())

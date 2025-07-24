@@ -1,76 +1,71 @@
 <div class="container">
   <h2>Teacher Enrollment</h2>
 
-  <!-- Enroll Button + Search -->
-  
   <div class="header-row">
-    <button class="enroll-btn" (click)="openForm()">+ Enroll teacher</button>
+    <button class="enroll-btn" (click)="openForm()">+ Enroll Teacher</button>
     <div class="search-box">
-      <input type="text" placeholder="Search by Roll No, Name, Email, Phone, Class or Section"
-             [(ngModel)]="searchTerm" (click)="searchTeachers()">
+      <input type="text" placeholder="Search by Name, Email, Phone, Class or Subject"
+             [(ngModel)]="searchTerm" (input)="searchTeachers()">
       <button (click)="searchTeachers()">Search</button>
     </div>
   </div>
 
-
   <!-- Table -->
-  <table>
+  <table *ngIf="filteredTeachers.length">
     <thead>
       <tr>
         <th>ID</th>
-        <th>Teacher Name</th>
-        <th>Father Name</th>
+        <th>Name</th>
+        <th>Father</th>
         <th>Phone</th>
         <th>Email</th>
         <th>Address</th>
         <th>Subject</th>
         <th>Class</th>
         <th>Profile Pic</th>
-        <th>Password</th>
         <th>Actions</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let teacher of filteredTeachers; let i = index">
-        <td>{{ teacher.id }}</td>
-        <td>{{ teacher.teacherNane }}</td>
-        <td>{{ teacher.fatherName }}</td>
-        <td>{{ teacher.phone }}</td>
-        <td>{{ teacher.email }}</td>
-        <td>{{ teacher.address }}</td>
-        <td>{{ teacher.subject }}</td>
-        <td>{{ teacher.class }}</td>
+      <tr *ngFor="let t of filteredTeachers">
+        <td>{{ t.id }}</td>
+        <td>{{ t.name }}</td>
+        <td>{{ t.father_name }}</td>
+        <td>{{ t.phone_number }}</td>
+        <td>{{ t.email }}</td>
+        <td>{{ t.address }}</td>
+        <td>{{ t.subject }}</td>
+        <td>{{ t.class }}</td>
         <td>
-          <img [src]="teacher.profilePic" alt="Profile" width="50" height="50">
+          <img *ngIf="t.profile_pic" [src]="t.profile_pic" alt="Profile" width="50" height="50">
         </td>
-        <td>{{ teacher.password }}</td>
         <td>
-          <button class="update-btn" (click)="editTeacher(teacher)">Update</button>
-          <button class="delete-btn" (click)="deleteTeacher(teacher.id)">Delete</button>
+          <button class="update-btn" (click)="openForm(t)">Update</button>
+          <button class="delete-btn" (click)="deleteTeacher(t.id)">Delete</button>
         </td>
       </tr>
     </tbody>
   </table>
-</div>
 
-<!-- Popup Form -->
-<div class="popup" [class.show]="showForm">
-  <div class="popup-content">
-    <h3>{{ editIndex !== null ? 'Update teacher' : 'Enroll teacher' }}</h3>
-    <form (ngSubmit)="onSubmit()">
-      <input type="text" [(ngModel)]="formData.teacherNane" name="nane" placeholder="Teacher Name" required>
-      <input type="text" [(ngModel)]="formData.fatherName" name="fatherName" placeholder="Father Name" required>
-      <input type="number" [(ngModel)]="formData.phone" name="phone" placeholder="Phone" required>
-      <input type="email" [(ngModel)]="formData.email" name="email" placeholder="Email" required>
-      <input type="text" [(ngModel)]="formData.address" name="address" placeholder="Address" required>
-      <input type="text" [(ngModel)]="formData.subject" name="subject" placeholder="Subjects" required>
-      <input type="text" [(ngModel)]="formData.class" name="class" placeholder="Class" required>
-      <input type="text" [(ngModel)]="formData.profilePic" name="profilePic" placeholder="Profile Pic URL">
-      <input type="text" [(ngModel)]="formData.password" name="password" placeholder="Password" required>
-      <div class="form-actions">
-        <button type="submit">{{ editIndex !== null ? 'Update' : 'Enroll' }}</button>
-        <button type="button" (click)="closeForm()">Cancel</button>
-      </div>
-    </form>
+  <!-- Popup -->
+  <div class="popup" [ngClass]="{'show': showForm}">
+    <div class="popup-content">
+      <h3>{{ editingId ? 'Update Teacher' : 'Enroll Teacher' }}</h3>
+      <form (ngSubmit)="saveTeacher()">
+        <input type="text" [(ngModel)]="formData.name" name="name" placeholder="Name" required>
+        <input type="text" [(ngModel)]="formData.father_name" name="father_name" placeholder="Father Name" required>
+        <input type="text" [(ngModel)]="formData.phone_number" name="phone_number" placeholder="Phone" required>
+        <input type="email" [(ngModel)]="formData.email" name="email" placeholder="Email" required>
+        <input type="text" [(ngModel)]="formData.address" name="address" placeholder="Address" required>
+        <input type="text" [(ngModel)]="formData.subject" name="subject" placeholder="Subject" required>
+        <input type="text" [(ngModel)]="formData.class" name="class" placeholder="Class" required>
+        <input type="file" (change)="onFileSelect($event)">
+        <input type="password" [(ngModel)]="formData.password" name="password" placeholder="Password" [required]="!editingId">
+        <div class="form-actions">
+          <button type="submit" [disabled]="isSaving">{{ editingId ? 'Update' : 'Enroll' }}</button>
+          <button type="button" (click)="closeForm()">Cancel</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
