@@ -1,69 +1,79 @@
-<h2>📚 Manage Classes</h2>
-<button (click)="openPopup()">+ Create Class</button>
+<div class="class-boxes">
+  <div class="class-box left" (click)="openPopup('11')">Class 11</div>
+  <div class="class-box right" (click)="openPopup('12')">Class 12</div>
+</div>
 
-<!-- Popup -->
-<div class="popup" *ngIf="showPopup">
-  <div class="popup-content">
-    <h3>Create New Class</h3>
+<!-- Popup Modal -->
+<div *ngIf="showPopup" class="popup">
+  <h3>Select Teacher for Class {{ selectedClass }}</h3>
+  <select [(ngModel)]="selectedTeacherId">
+    <option *ngFor="let t of teachers" [value]="t.id">{{ t.name }} - {{ t.subject }}</option>
+  </select>
 
-    <label>Class Name:</label>
-    <input type="text" [(ngModel)]="className" placeholder="e.g. Math - 11" required>
+  <h4>Students of Class {{ selectedClass }}</h4>
+  <ul class="student-list">
+    <li *ngFor="let s of matchedStudents">
+      {{ s.name }} ({{ s.roll_no }})
+    </li>
+  </ul>
 
-    <label>Select Class (e.g. 11, 12):</label>
-    <select [(ngModel)]="selectedClass" (change)="onClassChange()">
-      <option value="">-- Select Class --</option>
-      <option value="11">11</option>
-      <option value="12">12</option>
-    </select>
-
-    <label>Select Teacher:</label>
-    <select [(ngModel)]="selectedTeacherId">
-      <option value="">-- Select Teacher --</option>
-      <option *ngFor="let teacher of teachers" [value]="teacher.id">{{ teacher.name }}</option>
-    </select>
-
-    <h4>Students in Class {{ selectedClass }}</h4>
-    <table *ngIf="matchedStudents.length">
-      <thead>
-        <tr>
-          <th>Roll No</th>
-          <th>Name</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let student of matchedStudents">
-          <td>{{ student.roll_number }}</td>
-          <td>{{ student.name }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <p *ngIf="!matchedStudents.length && selectedClass">No students found in this class.</p>
-
-    <div class="form-actions">
-      <button (click)="saveClass()">Save</button>
-      <button (click)="closePopup()">Cancel</button>
-    </div>
+  <div class="form-actions">
+    <button (click)="saveClass()">Save</button>
+    <button (click)="closePopup()">Cancel</button>
   </div>
 </div>
 
-<!-- Show Created Classes -->
-<hr>
-<h3>🗂 Saved Classes</h3>
-<div *ngFor="let cls of savedClasses" class="class-box">
-  <h4>{{ cls.className }}</h4>
-  <p><strong>Teacher:</strong> {{ cls.teacherName }}</p>
-  <table>
-    <thead>
-      <tr>
-        <th>Roll No</th>
-        <th>Name</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let stu of cls.students">
-        <td>{{ stu.roll_number }}</td>
-        <td>{{ stu.name }}</td>
-      </tr>
-    </tbody>
-  </table>
+<!-- Class-wise Saved Tables -->
+<div class="class-lists">
+  <div class="saved-wrapper">
+    <h3>Class 11 Records</h3>
+    <div *ngFor="let c of getClassesByNumber('11'); let i = index" class="saved-class">
+      <div class="header">
+        <strong>{{ c.teacher }} - {{ c.subject }}</strong>
+        <button (click)="deleteClass(savedClasses.indexOf(c))">Delete</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Roll No</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of c.students; let j = index">
+            <td>{{ j + 1 }}</td>
+            <td>{{ s.name }}</td>
+            <td>{{ s.roll_no }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="saved-wrapper">
+    <h3>Class 12 Records</h3>
+    <div *ngFor="let c of getClassesByNumber('12'); let i = index" class="saved-class">
+      <div class="header">
+        <strong>{{ c.teacher }} - {{ c.subject }}</strong>
+        <button (click)="deleteClass(savedClasses.indexOf(c))">Delete</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Roll No</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of c.students; let j = index">
+            <td>{{ j + 1 }}</td>
+            <td>{{ s.name }}</td>
+            <td>{{ s.roll_no }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>

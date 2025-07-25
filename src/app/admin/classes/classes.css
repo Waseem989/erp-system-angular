@@ -1,50 +1,103 @@
-.popup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.6);
+.class-boxes {
   display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.popup-content {
-  background: #fff;
-  padding: 20px;
-  width: 600px;
-  border-radius: 8px;
-}
-
-.popup-content input,
-.popup-content select {
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 8px;
-}
-
-.form-actions {
-  text-align: right;
+  justify-content: space-between;
+  margin-bottom: 30px;
 }
 
 .class-box {
-  background: #f3f3f3;
-  margin: 10px 0;
-  padding: 10px;
-  border-left: 5px solid #007BFF;
+  width: 48%;
+  padding: 40px 0;
+  text-align: center;
+  font-size: 24px;
+  background: #e3f2fd;
+  border: 2px solid #2196f3;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-table {
+.class-box:hover {
+  background-color: #bbdefb;
+}
+
+.popup {
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 25px 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+  z-index: 999;
+  width: 400px;
+}
+
+.student-list {
+  list-style: none;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.student-list li {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.class-lists {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 40px;
+}
+
+.saved-wrapper {
+  width: 48%;
+}
+
+.saved-class {
+  margin-top: 20px;
+  padding: 15px;
+  border: 2px dashed #90caf9;
+  border-radius: 10px;
+  background: #f5faff;
+}
+
+.saved-class .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.saved-class table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
 }
 
-table, th, td {
-  border: 1px solid #aaa;
+.saved-class th, .saved-class td {
+  padding: 8px;
+  border: 1px solid #ddd;
 }
 
-th, td {
-  padding: 6px;
+button {
+  cursor: pointer;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  background: #1976d2;
+  color: white;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #0d47a1;
 }

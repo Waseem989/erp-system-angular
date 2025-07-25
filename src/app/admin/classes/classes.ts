@@ -11,26 +11,30 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./classes.css']
 })
 export class Classes implements OnInit {
-  token = 'C3L613pL9SED0ab6mj3sQcVm8s1nZ2Jc0SiAvMtjaf875eb4';
 
-  teachers: any[] = [];
   students: any[] = [];
-
-  className = '';
-  selectedClass = '';
-  selectedTeacherId = '';
+  teachers: any[] = [];
   matchedStudents: any[] = [];
+
   showPopup = false;
-  savedClasses: any[] = [];
+  selectedClass: string = '';
+  selectedTeacherId: string = '';
+  selectedStudentIds: number[] = [];
+
+  savedClasses: { class: string, teacher: string, subject: string, students: any[] }[] = [];
+
+  private studentUrl = 'http://192.168.1.107:8000/api/admin/students';
+  private teacherUrl = 'http://192.168.1.107:8000/api/admin/teachers';
+  private token = 'C3L613pL9SED0ab6mj3sQcVm8s1nZ2Jc0SiAvMtjaf875eb4';
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.fetchTeachers();
-    this.fetchStudents();
+    this.getStudents();
+    this.getTeachers();
   }
 
-  getHeaders() {
+  private getHeaders() {
     return {
       headers: new HttpHeaders({
         Authorization: `Bearer ${this.token}`
@@ -38,56 +42,58 @@ export class Classes implements OnInit {
     };
   }
 
-  fetchTeachers(): void {
-    this.http.get<any>('http://192.168.1.107:8000/api/admin/teachers', this.getHeaders()).subscribe({
-      next: res => {
-        this.teachers = res.teachers || [];
-      },
-      error: err => console.error('Teacher fetch error:', err)
+  getStudents() {
+    this.http.get<any>(this.studentUrl, this.getHeaders()).subscribe({
+      next: res => this.students = res?.students || [],
+      error: err => console.error('Student fetch error', err)
     });
   }
 
-  fetchStudents(): void {
-    this.http.get<any>('http://192.168.1.107:8000/api/admin/students', this.getHeaders()).subscribe({
-      next: res => {
-        this.students = res.students || [];
-      },
-      error: err => console.error('Student fetch error:', err)
+  getTeachers() {
+    this.http.get<any>(this.teacherUrl, this.getHeaders()).subscribe({
+      next: res => this.teachers = res?.teachers || res || [],
+      error: err => console.error('Teacher fetch error', err)
     });
   }
 
-  openPopup(): void {
+  openPopup(classNumber: string) {
+    this.selectedClass = classNumber;
     this.showPopup = true;
-    this.className = '';
+    this.selectedTeacherId = '';
+    this.matchedStudents = this.students.filter(s => s.class == classNumber);
+    this.selectedStudentIds = this.matchedStudents.map(s => s.id); // Select all by default
+  }
+
+  saveClass() {
+    if (!this.selectedTeacherId) return;
+
+    const teacher = this.teachers.find(t => t.id == this.selectedTeacherId);
+    const selectedStudents = this.students.filter(s => this.selectedStudentIds.includes(s.id));
+
+    const newClass = {
+      class: this.selectedClass,
+      teacher: teacher.name,
+      subject: teacher.subject,
+      students: selectedStudents
+    };
+
+    this.savedClasses.push(newClass);
+    this.closePopup();
+  }
+
+  closePopup() {
+    this.showPopup = false;
     this.selectedClass = '';
     this.selectedTeacherId = '';
     this.matchedStudents = [];
+    this.selectedStudentIds = [];
   }
 
-  closePopup(): void {
-    this.showPopup = false;
+  deleteClass(index: number) {
+    this.savedClasses.splice(index, 1);
   }
 
-  onClassChange(): void {
-    this.matchedStudents = this.students.filter(s => s.class === this.selectedClass);
+  getClassesByNumber(classNo: string) {
+    return this.savedClasses.filter(c => c.class === classNo);
   }
-
-  saveClass(): void {
-    if (!this.className || !this.selectedClass || !this.selectedTeacherId || this.matchedStudents.length === 0) {
-      alert('Fill all fields and make sure students exist for selected class.');
-      return;
-    }
-
-    const teacher = this.teachers.find(t => t.id == this.selectedTeacherId);
-
-    this.savedClasses.push({
-      className: this.className,
-      class: this.selectedClass,
-      teacherName: teacher?.name,
-      students: [...this.matchedStudents]
-    });
-
-    this.closePopup();
-  }
-  
 }

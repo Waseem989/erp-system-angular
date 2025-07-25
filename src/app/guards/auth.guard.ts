@@ -22,5 +22,6 @@ export const authGuard: CanActivateFn = () => {
   }
 
   // ✅ logged in -> allow route (role baad me check hoga)
+
   return true;
 };
